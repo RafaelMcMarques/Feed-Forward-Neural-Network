@@ -2,20 +2,20 @@ from .Base import BaseLayer
 import numpy as np
 
 class FullyConnected(BaseLayer):
-    optimizer = None
+    @property
+    def optimizer(self):
+        return self._optimizer
 
-    def get_optimizer(self):
-        return self.optimizer
-    
-    def set_optimizer(self, optimizer):
-        self.optimizer = optimizer
+    @optimizer.setter 
+    def optimizer(self, optimizer):
+        self._optimizer = optimizer
 
     def __init__ (self, input_size, output_size):
-        # call super here
         super().__init__()
         self.input_size = input_size
         self.output_size = output_size
         self.trainable = True
+        self._optimizer = None
         self.weights = np.random.rand(input_size + 1, output_size)
 
     def forward(self, input_tensor):
@@ -30,7 +30,7 @@ class FullyConnected(BaseLayer):
         #dL/dx = dL/dy * dy/dx
         prev_error_tensor = error_tensor @ self.weights[:-1, :].T # (m x input) = (m x output) @ (output x input)
 
-        if self.optimizer:
+        if self.optimizer is not None:
             self.weights = self.optimizer.calculate_update(self.weights, self.gradient_weights)
 
         return prev_error_tensor # this is dL/dx, which has dimensions m x input
